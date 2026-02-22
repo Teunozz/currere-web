@@ -1,7 +1,9 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
     import BookOpen from 'lucide-svelte/icons/book-open';
+    import BrainCircuit from 'lucide-svelte/icons/brain-circuit';
     import Folder from 'lucide-svelte/icons/folder';
+    import Key from 'lucide-svelte/icons/key';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
@@ -18,8 +20,8 @@
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
     import { toUrl } from '@/lib/utils';
-    import type { NavItem } from '@/types';
     import { dashboard } from '@/routes';
+    import type { NavItem } from '@/types';
 
     let {
         children,
@@ -29,9 +31,19 @@
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: 'Run Diary',
             href: dashboard(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'AI Analysis',
+            href: '/analysis',
+            icon: BrainCircuit,
+        },
+        {
+            title: 'API Tokens',
+            href: '/settings/tokens',
+            icon: Key,
         },
     ];
 
