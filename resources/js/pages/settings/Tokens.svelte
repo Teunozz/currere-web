@@ -4,7 +4,6 @@
     import Plus from 'lucide-svelte/icons/plus';
     import Trash2 from 'lucide-svelte/icons/trash-2';
     import QRCode from 'qrcode';
-    import { onMount } from 'svelte';
     import AppHead from '@/components/AppHead.svelte';
     import Heading from '@/components/Heading.svelte';
     import InputError from '@/components/InputError.svelte';
@@ -51,9 +50,9 @@
         { title: 'API Tokens', href: '/settings/tokens' },
     ];
 
-    onMount(async () => {
+    $effect(() => {
         if (newToken) {
-            await generateQrCode();
+            generateQrCode();
         }
     });
 
