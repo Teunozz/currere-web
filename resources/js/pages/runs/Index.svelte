@@ -2,6 +2,7 @@
     import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import RunFilters from '@/components/runs/RunFilters.svelte';
+    import RunRecordsAndAverages from '@/components/runs/RunRecordsAndAverages.svelte';
     import RunTable from '@/components/runs/RunTable.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { dashboard } from '@/routes';
@@ -29,7 +30,20 @@
         direction: string;
     };
 
-    let { runs, filters }: { runs: PaginatedRuns; filters: Filters } = $props();
+    type RecordEntry = { run_id: number; value: number } | null;
+
+    type Records = {
+        longest_distance: RecordEntry;
+        fastest_pace: RecordEntry;
+    };
+
+    type Averages = {
+        avg_distance_km: number | null;
+        avg_pace_seconds_per_km: number | null;
+        avg_heart_rate: number | null;
+    };
+
+    let { runs, filters, records, averages }: { runs: PaginatedRuns; filters: Filters; records: Records; averages: Averages } = $props();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -49,7 +63,9 @@
 
         <RunFilters {filters} />
 
-        <RunTable runs={runs.data} {filters} />
+        <RunRecordsAndAverages {records} {averages} />
+
+        <RunTable runs={runs.data} {filters} {records} />
 
         {#if runs.meta.last_page > 1}
             <nav class="flex items-center justify-center gap-1">

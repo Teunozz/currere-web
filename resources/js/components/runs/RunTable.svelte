@@ -3,6 +3,7 @@
     import ArrowDown from 'lucide-svelte/icons/arrow-down';
     import ArrowUp from 'lucide-svelte/icons/arrow-up';
     import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+    import { Badge } from '@/components/ui/badge';
     import { formatDate, formatDistance, formatDuration, formatPace } from '@/lib/formatters';
 
     type Run = {
@@ -21,7 +22,20 @@
         date_to?: string | null;
     };
 
-    let { runs, filters }: { runs: Run[]; filters: Filters } = $props();
+    type RecordEntry = { run_id: number; value: number } | null;
+
+    type Records = {
+        longest_distance: RecordEntry;
+        fastest_pace: RecordEntry;
+    };
+
+    let { runs, filters, records }: { runs: Run[]; filters: Filters; records: Records } = $props();
+
+    const recordRunIds = $derived(new Set(
+        [records.longest_distance, records.fastest_pace]
+            .filter((r): r is NonNullable<RecordEntry> => r !== null)
+            .map(r => r.run_id)
+    ));
 
     const columns = [
         { key: 'start_time', label: 'Date & Time' },
@@ -73,13 +87,23 @@
         <tbody>
             {#each runs as run (run.id)}
                 <tr
-                    class="border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 transition-colors"
+                    class="border-b border-border last:border-0 cursor-pointer transition-colors {recordRunIds.has(run.id) ? 'bg-amber-500/8 hover:bg-amber-500/15' : 'hover:bg-muted/30'}"
                     onclick={() => viewRun(run.id)}
                 >
                     <td class="px-4 py-3">{formatDate(run.start_time)}</td>
-                    <td class="px-4 py-3 tabular-nums">{formatDistance(run.distance_km)}</td>
+                    <td class="px-4 py-3 tabular-nums">
+                        {formatDistance(run.distance_km)}
+                        {#if records.longest_distance?.run_id === run.id}
+                            <Badge class="ml-1.5 bg-amber-500 text-white border-transparent text-[10px] px-1.5 py-0">PR</Badge>
+                        {/if}
+                    </td>
                     <td class="px-4 py-3 tabular-nums">{formatDuration(run.duration_seconds)}</td>
-                    <td class="px-4 py-3 tabular-nums">{formatPace(run.avg_pace_seconds_per_km)}</td>
+                    <td class="px-4 py-3 tabular-nums">
+                        {formatPace(run.avg_pace_seconds_per_km)}
+                        {#if records.fastest_pace?.run_id === run.id}
+                            <Badge class="ml-1.5 bg-amber-500 text-white border-transparent text-[10px] px-1.5 py-0">PR</Badge>
+                        {/if}
+                    </td>
                     <td class="px-4 py-3 tabular-nums">{run.avg_heart_rate ?? '-'}</td>
                 </tr>
             {:else}
