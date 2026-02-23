@@ -26,3 +26,10 @@ export function formatDate(isoString: string): string {
         minute: '2-digit',
     });
 }
+
+export function formatTimeRange(startIso: string, endIso: string): string {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+    const start = new Date(startIso).toLocaleTimeString('en-GB', options);
+    const end = new Date(endIso).toLocaleTimeString('en-GB', options);
+    return `${start} – ${end}`;
+}

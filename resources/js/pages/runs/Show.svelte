@@ -18,7 +18,7 @@
         DialogTrigger,
     } from '@/components/ui/dialog';
     import AppLayout from '@/layouts/AppLayout.svelte';
-    import { formatDate } from '@/lib/formatters';
+    import { formatDate, formatTimeRange } from '@/lib/formatters';
     import { dashboard } from '@/routes';
     import type { BreadcrumbItem } from '@/types';
 
@@ -107,13 +107,30 @@
             </Dialog>
         </div>
 
+        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <span class="material-symbols-outlined text-lg" style="color: var(--primary);">
+                directions_run
+            </span>
+            <span>Outdoor Run</span>
+            <span class="text-border">&middot;</span>
+            <span>{formatTimeRange(run.data.start_time, run.data.end_time)}</span>
+        </div>
+
+        <div class="h-px bg-primary/20"></div>
+
         <RunStats run={run.data} />
 
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Performance Charts
+        </h2>
         <div class="grid gap-6 lg:grid-cols-2">
             <HeartRateChart samples={run.data.heart_rate_samples} startTime={run.data.start_time} />
             <PaceChart splits={run.data.pace_splits} />
         </div>
 
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Kilometer Splits
+        </h2>
         <PaceSplitsTable splits={run.data.pace_splits} />
     </div>
 </AppLayout>

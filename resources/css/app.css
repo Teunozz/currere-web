@@ -2,6 +2,8 @@
 
 @import 'tw-animate-css';
 
+@import 'material-symbols/outlined.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
@@ -129,6 +131,12 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
+
+    /* Chart & functional colors (light theme) */
+    --chart-heart-rate: hsl(0 65% 55%);
+    --chart-pace: hsl(210 60% 50%);
+    --split-fast: hsl(122 40% 45%);
+    --split-slow: hsl(0 75% 55%);
 }
 
 .dark {
