@@ -17,6 +17,15 @@
             isPartial: s.is_partial,
         })),
     );
+
+    const paces = $derived(data.map((d) => d.pace));
+    const minPace = $derived(Math.min(...paces));
+    const maxPace = $derived(Math.max(...paces));
+    const yDomain = $derived.by(() => {
+        const range = maxPace - minPace;
+        const padding = Math.max(range * 0.5, 15);
+        return [minPace - padding, maxPace + padding];
+    });
 </script>
 
 {#if splits.length === 0}
@@ -38,6 +47,8 @@
                 {data}
                 x="km"
                 y="pace"
+                yDomain={yDomain}
+                yNice={false}
                 padding={{ top: 8, bottom: 24, left: 56, right: 8 }}
             >
                 <Svg>

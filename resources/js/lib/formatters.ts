@@ -8,7 +8,7 @@ export function formatDuration(totalSeconds: number): string {
 export function formatPace(secondsPerKm: number | null): string {
     if (secondsPerKm === null || secondsPerKm === 0) return '-';
     const minutes = Math.floor(secondsPerKm / 60);
-    const seconds = secondsPerKm % 60;
+    const seconds = Math.round(secondsPerKm % 60);
     return `${minutes}:${String(seconds).padStart(2, '0')}/km`;
 }
 
