@@ -13,8 +13,8 @@ export default defineConfig({
         }),
         tailwindcss(),
         svelte(),
-        wayfinder({
-            formVariants: true,
-        }),
+        ...(process.env.SKIP_WAYFINDER
+            ? []
+            : [wayfinder({ formVariants: true })]),
     ],
 });

@@ -1,0 +1,19 @@
+services:
+  currere:
+    image: teunozz/currere-web:latest
+    ports:
+      - "8080:80"
+    environment:
+      APP_KEY: "${APP_KEY}"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "${APP_URL:-http://localhost:8080}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+    volumes:
+      - currere-data:/data
+      - currere-storage:/var/www/html/storage
+    restart: unless-stopped
+
+volumes:
+  currere-data:
+  currere-storage:
