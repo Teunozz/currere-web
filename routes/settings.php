@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\TokenController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,4 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/tokens', [TokenController::class, 'index'])->name('tokens.index');
+    Route::post('settings/tokens', [TokenController::class, 'store'])->name('tokens.store');
+    Route::delete('settings/tokens/{token}', [TokenController::class, 'destroy'])->name('tokens.destroy');
 });
