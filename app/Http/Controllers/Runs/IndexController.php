@@ -56,6 +56,7 @@ class IndexController
             'records' => $this->getPersonalRecords($request->user()),
             'averages' => $this->getAverages($request->user()),
             'totals' => $this->getTotals($request->user()),
+            'paceTrend' => $this->getPaceTrendData($request->user()),
         ]);
     }
 
@@ -107,6 +108,41 @@ class IndexController
             'total_duration_seconds' => (int) $totals->total_duration_seconds,
             'total_runs' => (int) $totals->total_runs,
         ];
+    }
+
+    /**
+     * @return array<int, array{date: string, pace: int, bucket_km: int}>
+     */
+    private function getPaceTrendData(User $user): array
+    {
+        $runs = $user->runs()
+            ->whereNotNull('avg_pace_seconds_per_km')
+            ->with(['paceSplits' => fn ($q) => $q->where('is_partial', false)->orderBy('kilometer_number')])
+            ->orderBy('start_time')
+            ->get(['id', 'start_time', 'distance_km']);
+
+        $trendData = [];
+
+        foreach ($runs as $run) {
+            $splits = $run->paceSplits;
+            $maxKm = $splits->max('kilometer_number') ?? 0;
+
+            for ($bucketKm = 5; $bucketKm <= $maxKm; $bucketKm += 5) {
+                $relevantSplits = $splits->filter(fn ($s) => $s->kilometer_number <= $bucketKm);
+
+                if ($relevantSplits->count() !== $bucketKm) {
+                    continue;
+                }
+
+                $trendData[] = [
+                    'date' => $run->start_time->toIso8601String(),
+                    'pace' => (int) round($relevantSplits->avg('pace_seconds_per_km')),
+                    'bucket_km' => $bucketKm,
+                ];
+            }
+        }
+
+        return $trendData;
     }
 
     /**

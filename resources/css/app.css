@@ -66,6 +66,15 @@
     --color-chart-pace: var(--chart-pace);
     --color-split-fast: var(--split-fast);
     --color-split-slow: var(--split-slow);
+
+    --color-chart-bucket-1: var(--chart-bucket-1);
+    --color-chart-bucket-2: var(--chart-bucket-2);
+    --color-chart-bucket-3: var(--chart-bucket-3);
+    --color-chart-bucket-4: var(--chart-bucket-4);
+    --color-chart-bucket-5: var(--chart-bucket-5);
+    --color-chart-bucket-6: var(--chart-bucket-6);
+    --color-chart-bucket-7: var(--chart-bucket-7);
+    --color-chart-bucket-8: var(--chart-bucket-8);
 }
 
 /*
@@ -137,6 +146,16 @@
     --chart-pace: hsl(210 60% 50%);
     --split-fast: hsl(122 40% 45%);
     --split-slow: hsl(0 75% 55%);
+
+    /* Pace trend bucket colors (light theme) */
+    --chart-bucket-1: hsl(210 60% 50%);
+    --chart-bucket-2: hsl(150 50% 45%);
+    --chart-bucket-3: hsl(43 74% 55%);
+    --chart-bucket-4: hsl(12 76% 55%);
+    --chart-bucket-5: hsl(280 50% 55%);
+    --chart-bucket-6: hsl(340 65% 55%);
+    --chart-bucket-7: hsl(180 55% 42%);
+    --chart-bucket-8: hsl(90 45% 45%);
 }
 
 .dark {
@@ -180,6 +199,16 @@
     --chart-pace: #64b5f6;
     --split-fast: #66bb6a;
     --split-slow: #ef5350;
+
+    /* Pace trend bucket colors (dark theme) */
+    --chart-bucket-1: #64b5f6;
+    --chart-bucket-2: #66bb6a;
+    --chart-bucket-3: #ffd54f;
+    --chart-bucket-4: #ff8a65;
+    --chart-bucket-5: #ce93d8;
+    --chart-bucket-6: #f06292;
+    --chart-bucket-7: #4dd0e1;
+    --chart-bucket-8: #9ccc65;
 }
 
 @layer base {

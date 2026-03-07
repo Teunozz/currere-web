@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
+    import PaceTrendChart from '@/components/runs/PaceTrendChart.svelte';
     import RunFilters from '@/components/runs/RunFilters.svelte';
     import RunRecordsAndAverages from '@/components/runs/RunRecordsAndAverages.svelte';
     import RunTable from '@/components/runs/RunTable.svelte';
@@ -50,7 +51,13 @@
         total_runs: number;
     };
 
-    let { runs, filters, records, averages, totals }: { runs: PaginatedRuns; filters: Filters; records: Records; averages: Averages; totals: Totals } = $props();
+    type PaceTrendPoint = {
+        date: string;
+        pace: number;
+        bucket_km: number;
+    };
+
+    let { runs, filters, records, averages, totals, paceTrend }: { runs: PaginatedRuns; filters: Filters; records: Records; averages: Averages; totals: Totals; paceTrend: PaceTrendPoint[] } = $props();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -71,6 +78,8 @@
         <RunFilters {filters} />
 
         <RunRecordsAndAverages {records} {averages} {totals} />
+
+        <PaceTrendChart data={paceTrend} />
 
         <RunTable runs={runs.data} {filters} {records} />
 

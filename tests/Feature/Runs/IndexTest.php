@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\PaceSplit;
 use App\Models\Run;
 use App\Models\User;
 
@@ -227,5 +228,150 @@ test('totals ignore date filters', function () {
             ->where('totals.total_distance_km', 15)
             ->where('totals.total_duration_seconds', 5400)
             ->where('totals.total_runs', 2)
+        );
+});
+
+test('pace trend produces cumulative buckets for runs with enough splits', function () {
+    $user = User::factory()->create();
+
+    $run = Run::factory()->for($user)->create([
+        'start_time' => '2026-01-10T08:00:00Z',
+        'distance_km' => 12.5,
+        'avg_pace_seconds_per_km' => 300,
+    ]);
+
+    // Create 12 full km splits
+    foreach (range(1, 12) as $km) {
+        PaceSplit::factory()->for($run)->create([
+            'kilometer_number' => $km,
+            'pace_seconds_per_km' => 300,
+            'is_partial' => false,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('paceTrend', 2)
+            ->where('paceTrend.0.bucket_km', 5)
+            ->where('paceTrend.0.pace', 300)
+            ->where('paceTrend.1.bucket_km', 10)
+            ->where('paceTrend.1.pace', 300)
+        );
+});
+
+test('pace trend excludes partial splits from bucket computation', function () {
+    $user = User::factory()->create();
+
+    $run = Run::factory()->for($user)->create([
+        'start_time' => '2026-01-10T08:00:00Z',
+        'distance_km' => 5.5,
+        'avg_pace_seconds_per_km' => 300,
+    ]);
+
+    // Only 4 full splits + 1 partial at km 5
+    foreach (range(1, 4) as $km) {
+        PaceSplit::factory()->for($run)->create([
+            'kilometer_number' => $km,
+            'pace_seconds_per_km' => 300,
+            'is_partial' => false,
+        ]);
+    }
+    PaceSplit::factory()->for($run)->partial()->create([
+        'kilometer_number' => 5,
+        'pace_seconds_per_km' => 300,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('paceTrend', 0)
+        );
+});
+
+test('pace trend data is ordered chronologically', function () {
+    $user = User::factory()->create();
+
+    $olderRun = Run::factory()->for($user)->create([
+        'start_time' => '2026-01-01T08:00:00Z',
+        'distance_km' => 6.0,
+        'avg_pace_seconds_per_km' => 350,
+    ]);
+    $newerRun = Run::factory()->for($user)->create([
+        'start_time' => '2026-02-01T08:00:00Z',
+        'distance_km' => 6.0,
+        'avg_pace_seconds_per_km' => 300,
+    ]);
+
+    foreach ([$olderRun, $newerRun] as $run) {
+        foreach (range(1, 5) as $km) {
+            PaceSplit::factory()->for($run)->create([
+                'kilometer_number' => $km,
+                'pace_seconds_per_km' => $run->avg_pace_seconds_per_km,
+                'is_partial' => false,
+            ]);
+        }
+    }
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('paceTrend', 2)
+            ->where('paceTrend.0.pace', 350)
+            ->where('paceTrend.1.pace', 300)
+        );
+});
+
+test('pace trend excludes runs with null avg pace', function () {
+    $user = User::factory()->create();
+
+    $run = Run::factory()->for($user)->create([
+        'distance_km' => 6.0,
+        'avg_pace_seconds_per_km' => null,
+    ]);
+
+    foreach (range(1, 5) as $km) {
+        PaceSplit::factory()->for($run)->create([
+            'kilometer_number' => $km,
+            'pace_seconds_per_km' => 300,
+            'is_partial' => false,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('paceTrend', 0)
+        );
+});
+
+test('pace trend ignores date filters', function () {
+    $user = User::factory()->create();
+
+    $run = Run::factory()->for($user)->create([
+        'start_time' => '2025-06-01T08:00:00Z',
+        'distance_km' => 6.0,
+        'avg_pace_seconds_per_km' => 300,
+    ]);
+
+    foreach (range(1, 5) as $km) {
+        PaceSplit::factory()->for($run)->create([
+            'kilometer_number' => $km,
+            'pace_seconds_per_km' => 300,
+            'is_partial' => false,
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get('/dashboard?date_from=2026-02-01&date_to=2026-02-28')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('runs.data', 0)
+            ->has('paceTrend', 1)
+            ->where('paceTrend.0.bucket_km', 5)
         );
 });

@@ -24,7 +24,7 @@
     const yDomain = $derived.by(() => {
         const range = maxPace - minPace;
         const padding = Math.max(range * 0.5, 15);
-        return [minPace - padding, maxPace + padding];
+        return [maxPace + padding, minPace - padding];
     });
 </script>
 
@@ -74,9 +74,8 @@
                         placement="left"
                         format={(v) => formatPace(v)}
                         ticks={5}
-                        grid
+                        grid={{ class: 'stroke-border/50' }}
                         class="text-muted-foreground"
-                        gridProps={{ class: 'stroke-border/50' }}
                     />
                     <Area fill="url(#pace-gradient)" />
                     <Spline class="stroke-[var(--chart-pace)] stroke-2" />

@@ -69,9 +69,8 @@
                         placement="left"
                         format={(v) => `${v}`}
                         ticks={5}
-                        grid
+                        grid={{ class: 'stroke-border/50' }}
                         class="text-muted-foreground"
-                        gridProps={{ class: 'stroke-border/50' }}
                     />
                     <Area fill="url(#hr-gradient)" />
                     <Spline class="stroke-[var(--chart-heart-rate)] stroke-2" />
