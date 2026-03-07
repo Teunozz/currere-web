@@ -1,10 +1,8 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import PaceTrendChart from '@/components/runs/PaceTrendChart.svelte';
-    import RunFilters from '@/components/runs/RunFilters.svelte';
+    import RunHistory from '@/components/runs/RunHistory.svelte';
     import RunRecordsAndAverages from '@/components/runs/RunRecordsAndAverages.svelte';
-    import RunTable from '@/components/runs/RunTable.svelte';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import { dashboard } from '@/routes';
     import type { BreadcrumbItem } from '@/types';
@@ -75,35 +73,10 @@
             <h1 class="text-2xl font-bold">Run Diary</h1>
         </div>
 
-        <RunFilters {filters} />
-
         <RunRecordsAndAverages {records} {averages} {totals} />
 
         <PaceTrendChart data={paceTrend} />
 
-        <RunTable runs={runs.data} {filters} {records} />
-
-        {#if runs.meta.last_page > 1}
-            <nav class="flex items-center justify-center gap-1">
-                <!-- eslint-disable svelte/no-at-html-tags -- pagination labels from trusted Laravel backend contain HTML entities -->
-                {#each runs.meta.links as link, i (i)}
-                    {#if link.url}
-                        <Link
-                            href={link.url}
-                            class="rounded-lg px-3 py-1.5 text-sm transition-colors {link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}"
-                            preserveState
-                            preserveScroll
-                        >
-                            {@html link.label}
-                        </Link>
-                    {:else}
-                        <span class="px-3 py-1.5 text-sm text-muted-foreground">
-                            {@html link.label}
-                        </span>
-                    {/if}
-                {/each}
-                <!-- eslint-enable svelte/no-at-html-tags -->
-            </nav>
-        {/if}
+        <RunHistory runs={runs.data} {filters} {records} meta={runs.meta} />
     </div>
 </AppLayout>
