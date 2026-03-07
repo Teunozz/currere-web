@@ -55,11 +55,12 @@ class IndexController
             ],
             'records' => $this->getPersonalRecords($request->user()),
             'averages' => $this->getAverages($request->user()),
+            'totals' => $this->getTotals($request->user()),
         ]);
     }
 
     /**
-     * @return array{longest_distance: array{run_id: int, value: float}|null, fastest_pace: array{run_id: int, value: int}|null}
+     * @return array{longest_distance: array{run_id: int, value: float}|null, fastest_pace: array{run_id: int, value: int}|null, highest_heart_rate: array{run_id: int, value: int}|null}
      */
     private function getPersonalRecords(User $user): array
     {
@@ -72,6 +73,11 @@ class IndexController
             ->orderBy('avg_pace_seconds_per_km')
             ->first(['id', 'avg_pace_seconds_per_km']);
 
+        $highestHeartRate = $user->runs()
+            ->whereNotNull('avg_heart_rate')
+            ->orderByDesc('avg_heart_rate')
+            ->first(['id', 'avg_heart_rate']);
+
         return [
             'longest_distance' => $longestDistance
                 ? ['run_id' => $longestDistance->id, 'value' => (float) $longestDistance->distance_km]
@@ -79,6 +85,27 @@ class IndexController
             'fastest_pace' => $fastestPace
                 ? ['run_id' => $fastestPace->id, 'value' => $fastestPace->avg_pace_seconds_per_km]
                 : null,
+            'highest_heart_rate' => $highestHeartRate
+                ? ['run_id' => $highestHeartRate->id, 'value' => (int) $highestHeartRate->avg_heart_rate]
+                : null,
+        ];
+    }
+
+    /**
+     * @return array{total_distance_km: float, total_duration_seconds: int, total_runs: int}
+     */
+    private function getTotals(User $user): array
+    {
+        $totals = $user->runs()
+            ->selectRaw('COALESCE(SUM(distance_km), 0) as total_distance_km')
+            ->selectRaw('COALESCE(SUM(duration_seconds), 0) as total_duration_seconds')
+            ->selectRaw('COUNT(*) as total_runs')
+            ->first();
+
+        return [
+            'total_distance_km' => (float) round((float) $totals->total_distance_km, 3),
+            'total_duration_seconds' => (int) $totals->total_duration_seconds,
+            'total_runs' => (int) $totals->total_runs,
         ];
     }
 

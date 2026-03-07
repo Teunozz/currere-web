@@ -152,9 +152,13 @@ test('records and averages are null when user has no runs', function () {
         ->assertInertia(fn ($page) => $page
             ->where('records.longest_distance', null)
             ->where('records.fastest_pace', null)
+            ->where('records.highest_heart_rate', null)
             ->where('averages.avg_distance_km', null)
             ->where('averages.avg_pace_seconds_per_km', null)
             ->where('averages.avg_heart_rate', null)
+            ->where('totals.total_distance_km', 0)
+            ->where('totals.total_duration_seconds', 0)
+            ->where('totals.total_runs', 0)
         );
 });
 
@@ -176,5 +180,52 @@ test('runs with null pace are excluded from fastest pace record', function () {
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('records.fastest_pace.run_id', $withPace->id)
+        );
+});
+
+test('totals are computed correctly', function () {
+    $user = User::factory()->create();
+
+    Run::factory()->for($user)->create([
+        'distance_km' => 10.5,
+        'duration_seconds' => 3600,
+    ]);
+    Run::factory()->for($user)->create([
+        'distance_km' => 5.25,
+        'duration_seconds' => 1800,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->where('totals.total_distance_km', 15.75)
+            ->where('totals.total_duration_seconds', 5400)
+            ->where('totals.total_runs', 2)
+        );
+});
+
+test('totals ignore date filters', function () {
+    $user = User::factory()->create();
+
+    Run::factory()->for($user)->create([
+        'start_time' => '2025-06-01T08:00:00Z',
+        'distance_km' => 10.0,
+        'duration_seconds' => 3600,
+    ]);
+    Run::factory()->for($user)->create([
+        'start_time' => '2026-02-10T08:00:00Z',
+        'distance_km' => 5.0,
+        'duration_seconds' => 1800,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard?date_from=2026-02-01&date_to=2026-02-28')
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->has('runs.data', 1)
+            ->where('totals.total_distance_km', 15)
+            ->where('totals.total_duration_seconds', 5400)
+            ->where('totals.total_runs', 2)
         );
 });

@@ -35,6 +35,7 @@
     type Records = {
         longest_distance: RecordEntry;
         fastest_pace: RecordEntry;
+        highest_heart_rate: RecordEntry;
     };
 
     type Averages = {
@@ -43,7 +44,13 @@
         avg_heart_rate: number | null;
     };
 
-    let { runs, filters, records, averages }: { runs: PaginatedRuns; filters: Filters; records: Records; averages: Averages } = $props();
+    type Totals = {
+        total_distance_km: number;
+        total_duration_seconds: number;
+        total_runs: number;
+    };
+
+    let { runs, filters, records, averages, totals }: { runs: PaginatedRuns; filters: Filters; records: Records; averages: Averages; totals: Totals } = $props();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -63,7 +70,7 @@
 
         <RunFilters {filters} />
 
-        <RunRecordsAndAverages {records} {averages} />
+        <RunRecordsAndAverages {records} {averages} {totals} />
 
         <RunTable runs={runs.data} {filters} {records} />
 
