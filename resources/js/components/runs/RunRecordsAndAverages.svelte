@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { formatDistance, formatDuration, formatPace } from '@/lib/formatters';
+    import { formatDistance, formatHumanDuration, formatPace } from '@/lib/formatters';
 
     type RecordEntry = { run_id: number; value: number } | null;
 
@@ -110,7 +110,7 @@
                 },
                 {
                     label: 'Total Time',
-                    value: totals.total_duration_seconds > 0 ? formatDuration(totals.total_duration_seconds) : '-',
+                    value: totals.total_duration_seconds > 0 ? formatHumanDuration(totals.total_duration_seconds) : '-',
                     unit: null,
                 },
             ],
