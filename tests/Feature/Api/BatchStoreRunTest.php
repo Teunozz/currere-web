@@ -32,7 +32,7 @@ test('batch sync creates multiple runs and returns counts', function () {
 
 test('batch sync skips duplicates and reports mixed results', function () {
     $existingPayload = makeRunPayload('2026-02-20T08:00:00Z', '2026-02-20T08:30:00Z', 5.0, 1800);
-    $this->postJson('/api/v1/runs', $existingPayload, [
+    $this->postJson('/api/v1/runs/batch', ['runs' => [$existingPayload]], [
         'Authorization' => "Bearer {$this->token}",
     ])->assertCreated();
 

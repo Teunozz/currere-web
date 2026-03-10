@@ -61,7 +61,7 @@ test('revoked token returns 401 on API call', function () {
 
     $this->user->tokens()->where('id', $token->accessToken->id)->delete();
 
-    $this->getJson('/api/v1/runs', [
+    $this->getJson('/api/v1/ping', [
         'Authorization' => "Bearer {$plainToken}",
     ])->assertUnauthorized();
 });

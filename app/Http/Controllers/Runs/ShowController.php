@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Runs;
 
-use App\Http\Resources\RunDetailResource;
+use App\Http\Resources\RunResource;
 use App\Models\Run;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +21,7 @@ class ShowController
         $run->load(['heartRateSamples', 'paceSplits']);
 
         return Inertia::render('runs/Show', [
-            'run' => new RunDetailResource($run),
+            'run' => new RunResource($run),
         ]);
     }
 }

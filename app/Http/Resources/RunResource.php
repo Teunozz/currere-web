@@ -22,6 +22,17 @@ class RunResource extends JsonResource
             'avg_heart_rate' => $this->avg_heart_rate,
             'avg_pace_seconds_per_km' => $this->avg_pace_seconds_per_km,
             'created_at' => $this->created_at->toIso8601String(),
+            'heart_rate_samples' => $this->whenLoaded('heartRateSamples', fn () => $this->heartRateSamples->map(fn ($sample) => [
+                'timestamp' => $sample->timestamp->toIso8601String(),
+                'bpm' => $sample->bpm,
+            ])),
+            'pace_splits' => $this->whenLoaded('paceSplits', fn () => $this->paceSplits->map(fn ($split) => [
+                'kilometer_number' => $split->kilometer_number,
+                'split_time_seconds' => $split->split_time_seconds,
+                'pace_seconds_per_km' => (float) $split->pace_seconds_per_km,
+                'is_partial' => $split->is_partial,
+                'partial_distance_km' => $split->partial_distance_km ? (float) $split->partial_distance_km : null,
+            ])),
         ];
     }
 }

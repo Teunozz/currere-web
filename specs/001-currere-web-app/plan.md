@@ -62,10 +62,8 @@ app/
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Api/V1/
-│   │   │   ├── StoreRunController.php        # POST /api/v1/runs (invokable)
-│   │   │   ├── BatchStoreRunController.php   # POST /api/v1/runs/batch (invokable)
-│   │   │   ├── IndexRunController.php        # GET /api/v1/runs (invokable)
-│   │   │   └── ShowRunController.php         # GET /api/v1/runs/{run} (invokable)
+│   │   │   ├── PingController.php            # GET /api/v1/ping (invokable)
+│   │   │   └── BatchStoreRunController.php   # POST /api/v1/runs/batch (invokable)
 │   │   ├── Runs/
 │   │   │   ├── IndexController.php           # Dashboard/diary (invokable)
 │   │   │   ├── ShowController.php            # Run detail (invokable)
@@ -77,15 +75,11 @@ app/
 │   │       └── TokenController.php           # Token CRUD (resourceful)
 │   ├── Requests/
 │   │   ├── Api/
-│   │   │   ├── StoreRunRequest.php
 │   │   │   └── BatchStoreRunRequest.php
 │   │   └── Settings/
 │   │       └── StoreTokenRequest.php
 │   └── Resources/
-│       ├── RunResource.php
-│       ├── RunDetailResource.php
-│       ├── HeartRateSampleResource.php
-│       └── PaceSplitResource.php
+│       └── RunResource.php
 ├── Ai/
 │   ├── Agents/
 │   │   ├── MonthlyTrainingSummaryAgent.php
@@ -147,10 +141,8 @@ config/
 tests/
 ├── Feature/
 │   ├── Api/
-│   │   ├── StoreRunTest.php
 │   │   ├── BatchStoreRunTest.php
-│   │   ├── IndexRunTest.php
-│   │   └── ShowRunTest.php
+│   │   └── V1/PingTest.php
 │   ├── Runs/
 │   │   ├── IndexTest.php
 │   │   ├── ShowTest.php
