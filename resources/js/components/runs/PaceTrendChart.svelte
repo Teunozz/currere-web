@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { Axis, Chart, Highlight, Points, Spline, Svg, Tooltip } from 'layerchart';
     import { scaleTime } from 'd3-scale';
+    import { Axis, Chart, Highlight, Points, Spline, Svg, Tooltip } from 'layerchart';
+    import { SvelteSet } from 'svelte/reactivity';
     import { formatPace, formatShortDate } from '@/lib/formatters';
 
     type TrendPoint = {
@@ -36,31 +37,32 @@
         [...new Set(filteredPoints.map((d) => d.bucket_km))].sort((a, b) => a - b),
     );
 
-    let enabledBuckets = $state<Set<number>>(new Set());
+    let enabledBuckets: SvelteSet<number> = new SvelteSet();
 
     $effect(() => {
-        const counts = new Map<number, number>();
-        for (const km of buckets) {
-            counts.set(km, filteredPoints.filter((d) => d.bucket_km === km).length);
-        }
-        const top3 = [...counts.entries()]
+        const counts: [number, number][] = buckets.map((km) => [
+            km,
+            filteredPoints.filter((d) => d.bucket_km === km).length,
+        ]);
+        const top3 = counts
             .sort((a, b) => b[1] - a[1])
             .slice(0, 3)
             .map(([km]) => km);
-        enabledBuckets = new Set(top3);
+        enabledBuckets.clear();
+        for (const km of top3) {
+            enabledBuckets.add(km);
+        }
     });
 
     function toggleBucket(km: number): void {
         if (enabledBuckets.has(km) && enabledBuckets.size === 1) {
             return;
         }
-        const next = new Set(enabledBuckets);
-        if (next.has(km)) {
-            next.delete(km);
+        if (enabledBuckets.has(km)) {
+            enabledBuckets.delete(km);
         } else {
-            next.add(km);
+            enabledBuckets.add(km);
         }
-        enabledBuckets = next;
     }
 
     function bucketColor(km: number): string {
@@ -111,7 +113,7 @@
             </span>
             <h2 class="text-sm font-semibold">Pace Trend</h2>
             <div class="ml-auto flex gap-1">
-                {#each rangeOptions as range}
+                {#each rangeOptions as range (range)}
                     <button
                         type="button"
                         class="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors {selectedRange === range ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'}"
@@ -124,7 +126,7 @@
         </div>
 
         <div class="mb-3 flex flex-wrap gap-1.5">
-            {#each buckets as km}
+            {#each buckets as km (km)}
                 <button
                     type="button"
                     class="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
@@ -195,7 +197,7 @@
                                 <div class="mb-1 text-muted-foreground">
                                     {formatShortDate(d.date)}
                                 </div>
-                                {#each matchingPoints.sort((a, b) => a.bucket_km - b.bucket_km) as point}
+                                {#each matchingPoints.sort((a, b) => a.bucket_km - b.bucket_km) as point (point.bucket_km)}
                                     <div class="flex items-center gap-2">
                                         <span
                                             class="inline-block h-2 w-2 rounded-full"
