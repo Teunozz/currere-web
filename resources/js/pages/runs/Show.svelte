@@ -6,7 +6,7 @@
     import HeartRateChart from '@/components/runs/HeartRateChart.svelte';
     import PaceChart from '@/components/runs/PaceChart.svelte';
     import PaceSplitsTable from '@/components/runs/PaceSplitsTable.svelte';
-    import RunStats from '@/components/runs/RunStats.svelte';
+    import RunDetailStats from '@/components/runs/RunDetailStats.svelte';
     import { Button } from '@/components/ui/button';
     import {
         Dialog,
@@ -18,7 +18,7 @@
         DialogTrigger,
     } from '@/components/ui/dialog';
     import AppLayout from '@/layouts/AppLayout.svelte';
-    import { formatDate, formatTimeRange } from '@/lib/formatters';
+    import { formatDate, formatHumanDuration } from '@/lib/formatters';
     import { dashboard } from '@/routes';
     import type { BreadcrumbItem } from '@/types';
 
@@ -76,7 +76,9 @@
                 <Button variant="ghost" size="icon" onclick={() => router.get('/dashboard')}>
                     <ArrowLeft class="h-4 w-4" />
                 </Button>
-                <h1 class="text-2xl font-bold">{formatDate(run.data.start_time)}</h1>
+                <h1 class="text-2xl font-bold">
+                    {formatDate(run.data.start_time)} – {new Date(run.data.end_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                </h1>
             </div>
 
             <Dialog>
@@ -107,30 +109,25 @@
             </Dialog>
         </div>
 
-        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-            <span class="material-symbols-outlined text-lg" style="color: var(--primary);">
-                directions_run
+        <div>
+            <span
+                class="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-lg font-bold tabular-nums"
+                style="background-color: color-mix(in srgb, var(--chart-2) 15%, transparent); color: var(--chart-2);"
+            >
+                <span class="material-symbols-outlined text-xl">timer</span>
+                {formatHumanDuration(run.data.duration_seconds)}
             </span>
-            <span>Outdoor Run</span>
-            <span class="text-border">&middot;</span>
-            <span>{formatTimeRange(run.data.start_time, run.data.end_time)}</span>
         </div>
 
         <div class="h-px bg-primary/20"></div>
 
-        <RunStats run={run.data} />
+        <RunDetailStats run={run.data} />
 
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Performance Charts
-        </h2>
         <div class="grid gap-6 lg:grid-cols-2">
             <HeartRateChart samples={run.data.heart_rate_samples} startTime={run.data.start_time} />
             <PaceChart splits={run.data.pace_splits} />
         </div>
 
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Kilometer Splits
-        </h2>
         <PaceSplitsTable splits={run.data.pace_splits} />
     </div>
 </AppLayout>

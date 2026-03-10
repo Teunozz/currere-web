@@ -1,5 +1,6 @@
 <script lang="ts">
     import { formatDistance, formatHumanDuration, formatPace } from '@/lib/formatters';
+    import StatCard from './StatCard.svelte';
 
     type RecordEntry = { run_id: number; value: number } | null;
 
@@ -120,35 +121,6 @@
 
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {#each categoryCards as card (card.title)}
-        <div
-            class="rounded-xl border p-5"
-            style="background-color: color-mix(in srgb, {card.colorVar} 8%, var(--color-card)); border-color: color-mix(in srgb, {card.colorVar} 20%, transparent);"
-        >
-            <div class="mb-4 flex items-center gap-2">
-                <span
-                    class="material-symbols-outlined text-lg"
-                    style="color: {card.colorVar};"
-                >
-                    {card.icon}
-                </span>
-                <h2 class="text-sm font-semibold">{card.title}</h2>
-            </div>
-            <div class="flex flex-col">
-                {#each card.stats as stat, i (stat.label)}
-                    <div
-                        class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
-                        style={i > 0 ? `border-top: 1px solid color-mix(in srgb, ${card.colorVar} 15%, transparent);` : ''}
-                    >
-                        <span class="text-xs font-semibold">{stat.label}</span>
-                        <span
-                            class="rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums"
-                            style="background-color: color-mix(in srgb, {card.colorVar} 15%, transparent); color: {card.colorVar};"
-                        >
-                            {stat.value}{#if stat.unit}&nbsp;{stat.unit}{/if}
-                        </span>
-                    </div>
-                {/each}
-            </div>
-        </div>
+        <StatCard title={card.title} icon={card.icon} colorVar={card.colorVar} stats={card.stats} />
     {/each}
 </div>

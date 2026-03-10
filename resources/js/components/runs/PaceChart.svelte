@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Area, Axis, Chart, Highlight, LinearGradient, Spline, Svg, Tooltip } from 'layerchart';
     import { formatPace } from '@/lib/formatters';
+    import SectionCard from './SectionCard.svelte';
 
     type PaceSplit = {
         kilometer_number: number;
@@ -35,13 +36,7 @@
         No pace data
     </div>
 {:else}
-    <div class="rounded-xl border border-border bg-card p-4">
-        <div class="mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-base" style="color: var(--chart-pace);">
-                speed
-            </span>
-            <h3 class="text-sm font-medium text-muted-foreground">Pace per Kilometer</h3>
-        </div>
+    <SectionCard title="Pace per Kilometer" icon="speed" colorVar="var(--chart-pace)" plain>
         <div class="h-64">
             <Chart
                 {data}
@@ -106,5 +101,5 @@
                 </Tooltip.Context>
             </Chart>
         </div>
-    </div>
+    </SectionCard>
 {/if}

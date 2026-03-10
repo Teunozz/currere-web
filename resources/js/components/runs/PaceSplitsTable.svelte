@@ -1,5 +1,6 @@
 <script lang="ts">
     import { formatDuration, formatPace } from '@/lib/formatters';
+    import SectionCard from './SectionCard.svelte';
 
     type PaceSplit = {
         kilometer_number: number;
@@ -38,8 +39,7 @@
         No pace split data
     </div>
 {:else}
-    <div class="rounded-xl border border-border bg-card">
-        <h3 class="px-4 pt-4 text-sm font-medium text-muted-foreground">Pace Splits</h3>
+    <SectionCard title="Pace Splits" icon="speed" colorVar="var(--chart-pace)" plain>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -74,5 +74,5 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </SectionCard>
 {/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Area, Axis, Chart, Highlight, LinearGradient, Spline, Svg, Tooltip } from 'layerchart';
+    import SectionCard from './SectionCard.svelte';
 
     type HeartRateSample = {
         timestamp: string;
@@ -29,16 +30,7 @@
         No heart rate data
     </div>
 {:else}
-    <div class="rounded-xl border border-border bg-card p-4">
-        <div class="mb-4 flex items-center gap-2">
-            <span
-                class="material-symbols-outlined text-base"
-                style="color: var(--chart-heart-rate);"
-            >
-                favorite
-            </span>
-            <h3 class="text-sm font-medium text-muted-foreground">Heart Rate</h3>
-        </div>
+    <SectionCard title="Heart Rate" icon="favorite" colorVar="var(--chart-heart-rate)" plain>
         <div class="h-64">
             <Chart
                 data={data()}
@@ -99,5 +91,5 @@
                 </Tooltip.Context>
             </Chart>
         </div>
-    </div>
+    </SectionCard>
 {/if}

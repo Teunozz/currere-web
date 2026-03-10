@@ -109,7 +109,7 @@
                 class="material-symbols-outlined text-lg"
                 style="color: var(--chart-4);"
             >
-                trending_up
+                speed
             </span>
             <h2 class="text-sm font-semibold">Pace Trend</h2>
             <div class="ml-auto flex gap-1">
