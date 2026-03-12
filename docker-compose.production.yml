@@ -1,8 +1,8 @@
 services:
   currere:
-    image: teunozz/currere-web:latest
+    image: ${DOCKER_USERNAME:-teunozz}/${DOCKER_IMAGE_NAME:-currere-web}:latest
     ports:
-      - "8080:80"
+      - "${APP_PORT:-8080}:80"
     environment:
       APP_KEY: "${APP_KEY}"
       APP_ENV: production
