@@ -83,6 +83,27 @@ test('batch sync requires runs array', function () {
         ->assertJsonValidationErrors(['runs']);
 });
 
+test('batch sync detects duplicate regardless of datetime format', function () {
+    $this->postJson('/api/v1/runs/batch', [
+        'runs' => [makeRunPayload('2026-02-20T08:00:00Z', '2026-02-20T08:30:00Z', 5.0, 1800)],
+    ], [
+        'Authorization' => "Bearer {$this->token}",
+    ])->assertCreated();
+
+    // Same time expressed in a different timezone format
+    $response = $this->postJson('/api/v1/runs/batch', [
+        'runs' => [makeRunPayload('2026-02-20T09:00:00+01:00', '2026-02-20T09:30:00+01:00', 5.0, 1800)],
+    ], [
+        'Authorization' => "Bearer {$this->token}",
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.created', 0)
+        ->assertJsonPath('data.skipped', 1);
+
+    $this->assertDatabaseCount('runs', 1);
+});
+
 test('unauthenticated batch request returns 401', function () {
     $response = $this->postJson('/api/v1/runs/batch', [
         'runs' => [makeRunPayload('2026-02-20T08:00:00Z', '2026-02-20T08:30:00Z', 5.0, 1800)],

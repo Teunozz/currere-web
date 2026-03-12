@@ -22,12 +22,12 @@ class BatchStoreRunController
         $results = [];
 
         foreach ($validated['runs'] as $index => $runData) {
-            $startTime = Carbon::parse($runData['start_time']);
+            $startTime = Carbon::parse($runData['start_time'])->utc();
+            $endTime = Carbon::parse($runData['end_time'])->utc();
 
             $existing = Run::query()
                 ->where('user_id', $user->id)
                 ->where('start_time', $startTime)
-                ->where('distance_km', $runData['distance_km'])
                 ->first();
 
             if ($existing) {
@@ -42,10 +42,10 @@ class BatchStoreRunController
                 continue;
             }
 
-            $run = DB::transaction(function () use ($user, $runData): Run {
+            $run = DB::transaction(function () use ($user, $runData, $startTime, $endTime): Run {
                 $run = $user->runs()->create([
-                    'start_time' => $runData['start_time'],
-                    'end_time' => $runData['end_time'],
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
                     'distance_km' => $runData['distance_km'],
                     'duration_seconds' => $runData['duration_seconds'],
                     'steps' => $runData['steps'] ?? null,
