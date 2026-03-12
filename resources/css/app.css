@@ -64,9 +64,6 @@
 
     --color-chart-heart-rate: var(--chart-heart-rate);
     --color-chart-pace: var(--chart-pace);
-    --color-split-fast: var(--split-fast);
-    --color-split-slow: var(--split-slow);
-
     --color-chart-bucket-1: var(--chart-bucket-1);
     --color-chart-bucket-2: var(--chart-bucket-2);
     --color-chart-bucket-3: var(--chart-bucket-3);
@@ -144,9 +141,6 @@
     /* Chart & functional colors (light theme) */
     --chart-heart-rate: hsl(0 65% 55%);
     --chart-pace: hsl(210 60% 50%);
-    --split-fast: hsl(122 40% 45%);
-    --split-slow: hsl(0 75% 55%);
-
     /* Pace trend bucket colors (light theme) */
     --chart-bucket-1: hsl(210 60% 50%);
     --chart-bucket-2: hsl(150 50% 45%);
@@ -197,9 +191,6 @@
     /* Currere custom chart & functional colors */
     --chart-heart-rate: #e57373;
     --chart-pace: #64b5f6;
-    --split-fast: #66bb6a;
-    --split-slow: #ef5350;
-
     /* Pace trend bucket colors (dark theme) */
     --chart-bucket-1: #64b5f6;
     --chart-bucket-2: #66bb6a;

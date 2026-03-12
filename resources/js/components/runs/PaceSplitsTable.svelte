@@ -12,21 +12,32 @@
 
     let { splits }: { splits: PaceSplit[] } = $props();
 
-    const avgPace = $derived(
-        splits.length > 0
-            ? splits.reduce((sum, s) => sum + s.pace_seconds_per_km, 0) / splits.length
-            : 0
+    const minPace = $derived(
+        splits.length > 0 ? Math.min(...splits.map((s) => s.pace_seconds_per_km)) : 0
     );
 
+    const maxPace = $derived(
+        splits.length > 0 ? Math.max(...splits.map((s) => s.pace_seconds_per_km)) : 0
+    );
+
+    function normalizedPace(pace: number): number {
+        const range = maxPace - minPace;
+        if (range === 0) return 0.5;
+        return Math.min(Math.max((pace - minPace) / range, 0), 1);
+    }
+
     function paceBarWidth(pace: number): number {
-        if (avgPace === 0) return 50;
-        const ratio = pace / avgPace;
-        return Math.min(Math.max(ratio * 50, 10), 100);
+        return (0.3 + 0.7 * normalizedPace(pace)) * 100;
     }
 
     function paceBarColor(pace: number): string {
-        if (pace <= avgPace) return 'var(--split-fast)';
-        return 'var(--split-slow)';
+        const t = normalizedPace(pace);
+
+        const h = 122 - t * 122;
+        const s = 40 + t * 35;
+        const l = 45 + t * 10;
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
     }
 
     function cumulativeTime(index: number): number {
@@ -46,7 +57,7 @@
                     <tr class="border-b border-border">
                         <th class="px-4 py-2 text-left font-medium text-muted-foreground">KM</th>
                         <th class="px-4 py-2 text-left font-medium text-muted-foreground">Split Pace</th>
-                        <th class="px-4 py-2 text-left font-medium text-muted-foreground"></th>
+                        <th class="w-1/3 px-4 py-2 text-left font-medium text-muted-foreground"></th>
                         <th class="px-4 py-2 text-right font-medium text-muted-foreground">Cumulative</th>
                     </tr>
                 </thead>
