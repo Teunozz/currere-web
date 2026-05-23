@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Analysis;
 
 use App\Ai\Agents\RunCoachAgent;
+use App\Ai\Streaming\SseEventFormatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\UserMessage;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ChatController
 {
-    public function stream(Request $request): Response|JsonResponse
+    public function stream(Request $request, SseEventFormatter $formatter): Response|JsonResponse
     {
         $validated = $request->validate([
             'messages' => 'required|array|min:1',
@@ -39,7 +41,32 @@ class ChatController
         );
 
         $agent = new RunCoachAgent($request->user()->id, $history);
+        $stream = $agent->stream($latest['content']);
 
-        return $agent->stream($latest['content'])->toResponse($request);
+        return new StreamedResponse(function () use ($stream, $formatter): void {
+            foreach ($stream as $event) {
+                if (connection_aborted()) {
+                    return;
+                }
+
+                foreach ($formatter->format($event) as $frame) {
+                    echo $frame;
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    }
+                    flush();
+                }
+            }
+
+            echo $formatter->done();
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+            flush();
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 }

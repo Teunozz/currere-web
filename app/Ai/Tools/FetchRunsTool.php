@@ -14,6 +14,11 @@ class FetchRunsTool implements Tool
 {
     public function __construct(private int $userId) {}
 
+    public function name(): string
+    {
+        return 'fetch_runs';
+    }
+
     public function description(): Stringable|string
     {
         return 'Fetch the user\'s runs with optional filters. Supports rolling-window (days) or absolute date range (from/to), plus min/max filters on distance, pace, and average heart rate. Returns an array of runs each containing a `url` for citation.';

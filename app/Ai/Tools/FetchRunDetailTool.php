@@ -14,6 +14,11 @@ class FetchRunDetailTool implements Tool
 {
     public function __construct(private int $userId) {}
 
+    public function name(): string
+    {
+        return 'fetch_run_detail';
+    }
+
     public function description(): Stringable|string
     {
         return 'Fetch a single run with its heart rate samples and pace splits. Returns the run data plus a `url` for citation, or `{ "error": ... }` if the run does not exist or belongs to another user.';
