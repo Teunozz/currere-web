@@ -11,7 +11,7 @@ use App\Ai\Tools\FetchRunDetailTool;
 use App\Ai\Tools\FetchRunStatsTool;
 use App\Ai\Tools\FetchRunsTool;
 use Laravel\Ai\Attributes\Provider;
-use Laravel\Ai\Attributes\UseCheapestModel;
+use Laravel\Ai\Attributes\UseSmartestModel;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
@@ -20,7 +20,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[Provider(Lab::Anthropic)]
-#[UseCheapestModel]
+#[UseSmartestModel]
 class RunCoachAgent implements Agent, Conversational, HasTools
 {
     use Promptable;
