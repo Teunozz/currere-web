@@ -12,6 +12,8 @@
     import Trophy from 'lucide-svelte/icons/trophy';
     import Wrench from 'lucide-svelte/icons/wrench';
     import { tick } from 'svelte';
+    import { Markdown } from 'svelte-exmarkdown';
+    import { gfmPlugin } from 'svelte-exmarkdown/gfm';
     import AppHead from '@/components/AppHead.svelte';
     import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
     import AppLayout from '@/layouts/AppLayout.svelte';
@@ -69,27 +71,29 @@
         return decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '');
     }
 
-    const linkPattern = /\[([^\]]+)\]\(([^)\s]+)\)/g;
-    const safeUrl = /^(https?:\/\/|\/[^\s]*)/;
+    const markdownPlugins = [gfmPlugin()];
 
-    function escapeHtml(input: string): string {
-        return input
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
+    const proseChat =
+        'text-sm leading-relaxed ' +
+        '[&_p]:my-0 [&_p+p]:mt-3 ' +
+        '[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80 ' +
+        '[&_strong]:font-semibold [&_em]:italic ' +
+        '[&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 ' +
+        '[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 ' +
+        '[&_li]:my-0.5 ' +
+        '[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-xs ' +
+        '[&_pre]:my-2 [&_pre]:rounded-lg [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:text-xs [&_pre_code]:bg-transparent [&_pre_code]:p-0 ' +
+        '[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-muted-foreground ' +
+        '[&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-base [&_h1]:font-semibold ' +
+        '[&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-base [&_h2]:font-semibold ' +
+        '[&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-sm [&_h3]:font-semibold ' +
+        '[&_hr]:my-3 [&_hr]:border-border ' +
+        '[&_table]:my-2 [&_table]:w-full [&_table]:border-collapse [&_table]:text-xs ' +
+        '[&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold ' +
+        '[&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1';
 
-    function renderContent(text: string): string {
-        const escaped = escapeHtml(text);
-        return escaped.replace(linkPattern, (match, label: string, url: string) => {
-            if (!safeUrl.test(url)) {
-                return match;
-            }
-            return `<a href="${url}" class="font-medium text-primary underline underline-offset-2 hover:opacity-80">${label}</a>`;
-        });
-    }
+    const streamingCursor =
+        " [&>*:last-child]:after:ml-0.5 [&>*:last-child]:after:content-['▍'] [&>*:last-child]:after:animate-pulse [&>*:last-child]:after:text-muted-foreground/70";
 
     function resizeTextarea(): void {
         if (!textarea) return;
@@ -348,9 +352,8 @@
                                                 {/each}
                                             </div>
                                         {/if}
-                                        <div class="whitespace-pre-wrap text-sm leading-relaxed">
-                                            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                                            {@html renderContent(message.content)}
+                                        <div class={proseChat}>
+                                            <Markdown md={message.content} plugins={markdownPlugins} />
                                         </div>
                                     </div>
                                 </div>
@@ -383,12 +386,8 @@
                                     {/if}
 
                                     {#if currentAssistant.content}
-                                        <div class="whitespace-pre-wrap text-sm leading-relaxed">
-                                            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                                            {@html renderContent(currentAssistant.content)}<span
-                                                class="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-muted-foreground/70 align-middle"
-                                                aria-hidden="true"
-                                            ></span>
+                                        <div class={proseChat + streamingCursor}>
+                                            <Markdown md={currentAssistant.content} plugins={markdownPlugins} />
                                         </div>
                                     {:else}
                                         <div class="flex items-center gap-1 text-sm text-muted-foreground">
