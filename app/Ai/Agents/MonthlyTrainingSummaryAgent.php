@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Tools\FetchRecentRunsTool;
+use App\Ai\Tools\FetchRunsTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\UseCheapestModel;
@@ -31,7 +31,7 @@ class MonthlyTrainingSummaryAgent implements Agent, HasStructuredOutput, HasTool
     public function tools(): iterable
     {
         return [
-            new FetchRecentRunsTool($this->userId),
+            new FetchRunsTool($this->userId),
         ];
     }
 
