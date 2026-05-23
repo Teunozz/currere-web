@@ -80,3 +80,61 @@ test('returns the documented array shape', function () {
     expect($stats['best_pace_seconds_per_km'])->toBe(300);
     expect($stats['longest_run_km'])->toBe(10.0);
 });
+
+test('forDateRange aggregates between absolute dates', function () {
+    Run::factory()->for($this->user)->create([
+        'start_time' => now()->subDays(10),
+        'distance_km' => 10.0,
+        'duration_seconds' => 3000,
+        'avg_pace_seconds_per_km' => 300,
+    ]);
+    Run::factory()->for($this->user)->create([
+        'start_time' => now()->subDays(40),
+        'distance_km' => 4.0,
+        'duration_seconds' => 1600,
+        'avg_pace_seconds_per_km' => 400,
+    ]);
+    Run::factory()->for($this->user)->create([
+        'start_time' => now()->subDays(100),
+        'distance_km' => 50.0,
+        'duration_seconds' => 9000,
+        'avg_pace_seconds_per_km' => 200,
+    ]);
+
+    $from = now()->subDays(50)->toDateString();
+    $to = now()->subDays(5)->toDateString();
+
+    $stats = (new RunStatsQuery($this->user->id))->forDateRange($from, $to);
+
+    expect(array_keys($stats))->toEqualCanonicalizing([
+        'from', 'to', 'total_distance_km', 'total_time_seconds', 'run_count', 'avg_pace_seconds_per_km', 'best_pace_seconds_per_km', 'longest_run_km',
+    ]);
+    expect($stats['from'])->toBe($from);
+    expect($stats['to'])->toBe($to);
+    expect($stats['run_count'])->toBe(2);
+    expect($stats['total_distance_km'])->toBe(14.0);
+    expect($stats['total_time_seconds'])->toBe(4600);
+    expect($stats['best_pace_seconds_per_km'])->toBe(300);
+    expect($stats['longest_run_km'])->toBe(10.0);
+});
+
+test('forDateRange isolates by user', function () {
+    $otherUser = User::factory()->create();
+
+    Run::factory()->for($this->user)->create([
+        'start_time' => now()->subDays(10),
+        'distance_km' => 5.0,
+    ]);
+    Run::factory()->for($otherUser)->create([
+        'start_time' => now()->subDays(10),
+        'distance_km' => 999.0,
+    ]);
+
+    $stats = (new RunStatsQuery($this->user->id))->forDateRange(
+        now()->subDays(30)->toDateString(),
+        now()->toDateString(),
+    );
+
+    expect($stats['run_count'])->toBe(1);
+    expect($stats['total_distance_km'])->toBe(5.0);
+});
