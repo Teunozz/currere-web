@@ -3,7 +3,6 @@
 use App\Http\Controllers\Analysis\ChatController as AnalysisChatController;
 use App\Http\Controllers\Analysis\ConfirmActionController as AnalysisConfirmActionController;
 use App\Http\Controllers\Analysis\IndexController as AnalysisIndexController;
-use App\Http\Controllers\Analysis\RunSkillController;
 use App\Http\Controllers\Runs\DestroyController as RunsDestroyController;
 use App\Http\Controllers\Runs\IndexController as RunsIndexController;
 use App\Http\Controllers\Runs\ShowController as RunsShowController;
@@ -29,7 +28,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('analysis/actions/{id}/confirm', AnalysisConfirmActionController::class)
         ->whereUuid('id')
         ->name('analysis.actions.confirm');
-    Route::post('analysis/{skill}', RunSkillController::class)->name('analysis.run');
 });
 
 require __DIR__.'/settings.php';
