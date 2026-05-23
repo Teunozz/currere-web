@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Models\Run;
+use App\Queries\RunsQuery;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -23,13 +23,7 @@ class FetchRecentRunsTool implements Tool
     {
         $days = $request['days'] ?? 30;
 
-        $runs = Run::query()
-            ->where('user_id', $this->userId)
-            ->where('start_time', '>=', now()->subDays($days))
-            ->orderByDesc('start_time')
-            ->get(['id', 'start_time', 'distance_km', 'duration_seconds', 'steps', 'avg_heart_rate', 'avg_pace_seconds_per_km']);
-
-        return $runs->toJson();
+        return (new RunsQuery($this->userId))->recent($days)->toJson();
     }
 
     public function schema(JsonSchema $schema): array
