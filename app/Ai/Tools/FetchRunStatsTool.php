@@ -14,6 +14,11 @@ class FetchRunStatsTool implements Tool
 {
     public function __construct(private int $userId) {}
 
+    public function name(): string
+    {
+        return 'fetch_run_stats';
+    }
+
     public function description(): Stringable|string
     {
         return 'Fetch aggregated run statistics for the user over a given period. Returns total distance, total time, run count, average pace, and best pace.';

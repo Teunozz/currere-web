@@ -14,6 +14,11 @@ class FetchHeartRateDataTool implements Tool
 {
     public function __construct(private int $userId) {}
 
+    public function name(): string
+    {
+        return 'fetch_heart_rate_data';
+    }
+
     public function description(): Stringable|string
     {
         return 'Fetch heart rate data across recent runs. Returns per-run average HR, max observed HR, and time-in-zone estimates.';

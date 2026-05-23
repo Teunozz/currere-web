@@ -15,6 +15,7 @@
     import { Markdown } from 'svelte-exmarkdown';
     import { gfmPlugin } from 'svelte-exmarkdown/gfm';
     import AppHead from '@/components/AppHead.svelte';
+    import ConfirmCard, { type ConfirmResult, type PendingAction } from '@/components/analysis/ConfirmCard.svelte';
     import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
     import AppLayout from '@/layouts/AppLayout.svelte';
     import type { BreadcrumbItem } from '@/types';
@@ -23,14 +24,27 @@
     type StarterPrompt = { id: string; label: string; prompt: string };
     type ToolCall = { name: string; args: Record<string, unknown> };
     type Role = 'user' | 'assistant';
-    type ChatMessage = { id: string; role: Role; content: string; toolCalls?: ToolCall[] };
+    type ConfirmStatus = 'executed' | 'cancelled' | 'error';
+    type ChatMessage = {
+        id: string;
+        role: Role;
+        content: string;
+        toolCalls?: ToolCall[];
+        pendingAction?: PendingAction;
+        confirmStatus?: ConfirmStatus;
+    };
 
     let { starterPrompts, runCount }: { starterPrompts: StarterPrompt[]; runCount: number } = $props();
 
     let messages = $state<ChatMessage[]>([]);
     let input = $state('');
     let streaming = $state(false);
-    let currentAssistant = $state<{ id: string; content: string; toolCalls: ToolCall[] } | null>(null);
+    let currentAssistant = $state<{
+        id: string;
+        content: string;
+        toolCalls: ToolCall[];
+        pendingAction?: PendingAction;
+    } | null>(null);
     let error = $state<string | null>(null);
     let isAtBottom = $state(true);
 
@@ -49,6 +63,8 @@
         fetch_run_detail: { label: 'Opening run detail', icon: FileText },
         compare_periods: { label: 'Comparing periods', icon: GitCompareArrows },
         fetch_personal_bests: { label: 'Looking up PBs', icon: Trophy },
+        propose_run_edit: { label: 'Proposing edit', icon: Wrench },
+        propose_run_delete: { label: 'Proposing delete', icon: Wrench },
     };
 
     function toolLabel(name: string): string {
@@ -207,7 +223,18 @@
                 finalize();
                 return;
             }
-            let parsed: { type?: string; delta?: string; tool_name?: string; arguments?: Record<string, unknown> };
+            let parsed: {
+                type?: string;
+                delta?: string;
+                tool_name?: string;
+                arguments?: Record<string, unknown>;
+                id?: string;
+                action_type?: 'edit_run' | 'delete_run';
+                run_id?: number;
+                changes?: Record<string, unknown>;
+                summary?: string;
+                expires_at?: string;
+            };
             try {
                 parsed = JSON.parse(payload);
             } catch {
@@ -229,12 +256,32 @@
                     ],
                 };
                 maybeAutoScroll();
+            } else if (
+                parsed.type === 'pending_action' &&
+                typeof parsed.id === 'string' &&
+                (parsed.action_type === 'edit_run' || parsed.action_type === 'delete_run')
+            ) {
+                currentAssistant = {
+                    ...currentAssistant,
+                    pendingAction: {
+                        id: parsed.id,
+                        action_type: parsed.action_type,
+                        run_id: parsed.run_id ?? 0,
+                        changes: parsed.changes ?? {},
+                        summary: parsed.summary ?? '',
+                        expires_at: parsed.expires_at ?? '',
+                    },
+                };
+                maybeAutoScroll();
             }
         }
     }
 
     function finalize(): void {
-        if (currentAssistant && (currentAssistant.content || currentAssistant.toolCalls.length)) {
+        if (
+            currentAssistant &&
+            (currentAssistant.content || currentAssistant.toolCalls.length || currentAssistant.pendingAction)
+        ) {
             messages = [
                 ...messages,
                 {
@@ -242,12 +289,17 @@
                     role: 'assistant',
                     content: currentAssistant.content,
                     toolCalls: currentAssistant.toolCalls,
+                    pendingAction: currentAssistant.pendingAction,
                 },
             ];
         }
         currentAssistant = null;
         streaming = false;
         abortController = null;
+    }
+
+    function handleConfirmResult(messageId: string, result: ConfirmResult): void {
+        messages = messages.map((m) => (m.id === messageId ? { ...m, confirmStatus: result.status } : m));
     }
 
     function stop(): void {
@@ -355,6 +407,12 @@
                                         <div class={proseChat}>
                                             <Markdown md={message.content} plugins={markdownPlugins} />
                                         </div>
+                                        {#if message.pendingAction && !message.confirmStatus}
+                                            <ConfirmCard
+                                                action={message.pendingAction}
+                                                onResult={(r) => handleConfirmResult(message.id, r)}
+                                            />
+                                        {/if}
                                     </div>
                                 </div>
                             {/if}
@@ -396,6 +454,9 @@
                                             <span class="size-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]"></span>
                                             <span class="size-1.5 animate-bounce rounded-full bg-muted-foreground/60"></span>
                                         </div>
+                                    {/if}
+                                    {#if currentAssistant.pendingAction}
+                                        <ConfirmCard action={currentAssistant.pendingAction} onResult={() => {}} />
                                     {/if}
                                 </div>
                             </div>

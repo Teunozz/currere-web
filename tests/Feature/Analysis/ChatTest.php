@@ -9,6 +9,8 @@ use App\Ai\Tools\FetchPersonalBestsTool;
 use App\Ai\Tools\FetchRunDetailTool;
 use App\Ai\Tools\FetchRunStatsTool;
 use App\Ai\Tools\FetchRunsTool;
+use App\Ai\Tools\ProposeRunDeleteTool;
+use App\Ai\Tools\ProposeRunEditTool;
 use App\Models\Run;
 use App\Models\User;
 
@@ -131,7 +133,7 @@ test('last message must be from the user', function () {
         ->assertJsonValidationErrors(['messages']);
 });
 
-test('agent wires up all six read tools so tool calls can stream as separate events', function () {
+test('agent wires up all read + propose tools so tool calls can stream as separate events', function () {
     $tools = collect((new RunCoachAgent(1))->tools())->map(fn ($tool) => $tool::class)->all();
 
     expect($tools)->toEqualCanonicalizing([
@@ -141,6 +143,8 @@ test('agent wires up all six read tools so tool calls can stream as separate eve
         FetchRunDetailTool::class,
         ComparePeriodsTool::class,
         FetchPersonalBestsTool::class,
+        ProposeRunEditTool::class,
+        ProposeRunDeleteTool::class,
     ]);
 });
 
@@ -149,4 +153,12 @@ test('system prompt instructs the model to cite runs by url', function () {
 
     expect($instructions)->toContain('url')
         ->and($instructions)->toContain('Citation');
+});
+
+test('system prompt includes the propose-tool confirmation rule', function () {
+    $instructions = (string) (new RunCoachAgent(1))->instructions();
+
+    expect($instructions)->toContain('propose_')
+        ->and($instructions)->toContain('confirm')
+        ->and($instructions)->toContain('Confirmation rule');
 });

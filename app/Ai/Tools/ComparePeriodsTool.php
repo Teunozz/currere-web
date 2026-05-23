@@ -14,6 +14,11 @@ class ComparePeriodsTool implements Tool
 {
     public function __construct(private int $userId) {}
 
+    public function name(): string
+    {
+        return 'compare_periods';
+    }
+
     public function description(): Stringable|string
     {
         return 'Compare aggregated run statistics for two date ranges side-by-side. Both periods are aggregated independently and returned under `period_a` and `period_b`. Dates should be ISO date strings (YYYY-MM-DD).';
