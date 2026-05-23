@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Analysis\ChatController as AnalysisChatController;
 use App\Http\Controllers\Analysis\IndexController as AnalysisIndexController;
 use App\Http\Controllers\Analysis\RunSkillController;
 use App\Http\Controllers\Runs\DestroyController as RunsDestroyController;
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('runs/{run}', RunsDestroyController::class)->name('runs.destroy');
 
     Route::get('analysis', AnalysisIndexController::class)->name('analysis.index');
+    Route::post('analysis/chat', [AnalysisChatController::class, 'stream'])->name('analysis.chat');
     Route::post('analysis/{skill}', RunSkillController::class)->name('analysis.run');
 });
 
