@@ -329,7 +329,7 @@
 <AppHead title="AI Coach" />
 
 <AppLayout {breadcrumbs}>
-    <div class="flex min-h-0 flex-1 flex-col">
+    <div class="flex h-[calc(100svh-4rem)] min-h-0 flex-col">
         <div
             bind:this={scrollContainer}
             onscroll={onScroll}
