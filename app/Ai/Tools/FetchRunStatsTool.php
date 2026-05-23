@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
-use App\Models\Run;
+use App\Queries\RunStatsQuery;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
@@ -23,21 +23,7 @@ class FetchRunStatsTool implements Tool
     {
         $days = $request['days'] ?? 90;
 
-        $query = Run::query()
-            ->where('user_id', $this->userId)
-            ->where('start_time', '>=', now()->subDays($days));
-
-        $stats = [
-            'period_days' => $days,
-            'total_distance_km' => (float) $query->sum('distance_km'),
-            'total_time_seconds' => (int) $query->sum('duration_seconds'),
-            'run_count' => $query->count(),
-            'avg_pace_seconds_per_km' => (int) $query->avg('avg_pace_seconds_per_km'),
-            'best_pace_seconds_per_km' => (int) $query->min('avg_pace_seconds_per_km'),
-            'longest_run_km' => (float) $query->max('distance_km'),
-        ];
-
-        return json_encode($stats);
+        return json_encode((new RunStatsQuery($this->userId))->forPeriod($days));
     }
 
     public function schema(JsonSchema $schema): array
