@@ -12,7 +12,10 @@ use Stringable;
 
 class FetchPersonalBestsTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -26,7 +29,7 @@ class FetchPersonalBestsTool implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $bests = (new PersonalBestsQuery($this->userId))->forUser();
+        $bests = (new PersonalBestsQuery($this->userId, $this->timezone))->forUser();
 
         $rows = [];
         foreach ($bests as $milestone => $pb) {

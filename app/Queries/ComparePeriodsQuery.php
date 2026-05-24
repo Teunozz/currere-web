@@ -6,7 +6,10 @@ namespace App\Queries;
 
 class ComparePeriodsQuery
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array{
@@ -16,7 +19,7 @@ class ComparePeriodsQuery
      */
     public function compare(string $fromA, string $toA, string $fromB, string $toB): array
     {
-        $stats = new RunStatsQuery($this->userId);
+        $stats = new RunStatsQuery($this->userId, $this->timezone);
 
         return [
             'period_a' => $stats->forDateRange($fromA, $toA),

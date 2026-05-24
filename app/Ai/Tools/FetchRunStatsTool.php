@@ -12,7 +12,10 @@ use Stringable;
 
 class FetchRunStatsTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -28,7 +31,7 @@ class FetchRunStatsTool implements Tool
     {
         $days = $request['days'] ?? 90;
 
-        return json_encode((new RunStatsQuery($this->userId))->forPeriod($days));
+        return json_encode((new RunStatsQuery($this->userId, $this->timezone))->forPeriod($days));
     }
 
     public function schema(JsonSchema $schema): array

@@ -16,6 +16,7 @@ class ProposeRunEditTool implements Tool
 {
     public function __construct(
         private int $userId,
+        private string $timezone = 'UTC',
         private PendingActionStore $store = new PendingActionStore,
     ) {}
 
@@ -97,7 +98,7 @@ class ProposeRunEditTool implements Tool
 
         return sprintf(
             'Edit run on %s: %s',
-            $run->start_time->toDateString(),
+            $run->start_time->copy()->setTimezone($this->timezone)->toDateString(),
             implode(', ', $parts),
         );
     }
@@ -108,8 +109,8 @@ class ProposeRunEditTool implements Tool
             return '—';
         }
 
-        if (is_object($value) && method_exists($value, 'toDateTimeString')) {
-            return $value->toDateTimeString();
+        if (is_object($value) && method_exists($value, 'copy') && method_exists($value, 'setTimezone')) {
+            return $value->copy()->setTimezone($this->timezone)->toDateTimeString();
         }
 
         return (string) $value;

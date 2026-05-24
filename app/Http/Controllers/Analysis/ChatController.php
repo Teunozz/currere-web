@@ -8,6 +8,7 @@ use App\Ai\Agents\RunCoachAgent;
 use App\Ai\Streaming\SseEventFormatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\UserMessage;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,7 @@ class ChatController
             'messages' => 'required|array|min:1',
             'messages.*.role' => 'required|string|in:user,assistant',
             'messages.*.content' => 'required|string',
+            'timezone' => ['nullable', 'string', Rule::in(timezone_identifiers_list())],
         ]);
 
         $messages = $validated['messages'];
@@ -40,7 +42,9 @@ class ChatController
             $messages,
         );
 
-        $agent = new RunCoachAgent($request->user()->id, $history);
+        $timezone = $validated['timezone'] ?? config('app.timezone');
+
+        $agent = new RunCoachAgent($request->user()->id, $history, $timezone);
         $stream = $agent->stream($latest['content']);
 
         return new StreamedResponse(function () use ($stream, $formatter): void {

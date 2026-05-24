@@ -12,7 +12,10 @@ use Stringable;
 
 class ComparePeriodsTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -32,7 +35,7 @@ class ComparePeriodsTool implements Tool
         $toB = (string) $request['to_b'];
 
         return json_encode(
-            (new ComparePeriodsQuery($this->userId))->compare($fromA, $toA, $fromB, $toB),
+            (new ComparePeriodsQuery($this->userId, $this->timezone))->compare($fromA, $toA, $fromB, $toB),
         );
     }
 

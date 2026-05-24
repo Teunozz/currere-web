@@ -19,7 +19,10 @@ class PersonalBestsQuery
         'M' => 42.195,
     ];
 
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array<string, array{run_id: int, start_time: string, distance_km: float, avg_pace_seconds_per_km: int, predicted_seconds: int}|null>
@@ -44,7 +47,7 @@ class PersonalBestsQuery
 
             $results[$label] = [
                 'run_id' => (int) $run->id,
-                'start_time' => $run->start_time->toIso8601String(),
+                'start_time' => $run->start_time->copy()->setTimezone($this->timezone)->toIso8601String(),
                 'distance_km' => (float) $run->distance_km,
                 'avg_pace_seconds_per_km' => (int) $run->avg_pace_seconds_per_km,
                 'predicted_seconds' => (int) round($run->avg_pace_seconds_per_km * $distanceKm),

@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace App\Queries;
 
 use App\Models\Run;
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
 
 class RunStatsQuery
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array{period_days: int, total_distance_km: float, total_time_seconds: int, run_count: int, avg_pace_seconds_per_km: int, best_pace_seconds_per_km: int, longest_run_km: float}
      */
     public function forPeriod(int $days = 90): array
     {
-        $from = now()->subDays($days)->toDateTimeString();
-        $to = now()->toDateTimeString();
+        $from = now()->subDays($days);
+        $to = now();
 
         return ['period_days' => $days] + $this->aggregate($from, $to);
     }
@@ -26,13 +31,16 @@ class RunStatsQuery
      */
     public function forDateRange(string $from, string $to): array
     {
-        return ['from' => $from, 'to' => $to] + $this->aggregate($from, $to.' 23:59:59');
+        $fromDt = CarbonImmutable::parse($from, $this->timezone);
+        $toDt = CarbonImmutable::parse($to, $this->timezone)->endOfDay();
+
+        return ['from' => $from, 'to' => $to] + $this->aggregate($fromDt, $toDt);
     }
 
     /**
      * @return array{total_distance_km: float, total_time_seconds: int, run_count: int, avg_pace_seconds_per_km: int, best_pace_seconds_per_km: int, longest_run_km: float}
      */
-    private function aggregate(string $from, string $to): array
+    private function aggregate(DateTimeInterface $from, DateTimeInterface $to): array
     {
         $query = Run::query()
             ->where('user_id', $this->userId)

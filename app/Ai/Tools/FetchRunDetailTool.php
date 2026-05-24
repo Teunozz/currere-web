@@ -12,7 +12,10 @@ use Stringable;
 
 class FetchRunDetailTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -28,7 +31,7 @@ class FetchRunDetailTool implements Tool
     {
         $runId = (int) ($request['run_id'] ?? 0);
 
-        $detail = (new RunDetailQuery($this->userId))->forRun($runId);
+        $detail = (new RunDetailQuery($this->userId, $this->timezone))->forRun($runId);
 
         if ($detail === null) {
             return json_encode(['error' => 'Run not found']);

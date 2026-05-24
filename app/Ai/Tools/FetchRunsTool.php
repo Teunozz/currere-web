@@ -12,7 +12,10 @@ use Stringable;
 
 class FetchRunsTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -41,12 +44,18 @@ class FetchRunsTool implements Tool
             fn ($value) => $value !== null,
         );
 
-        $runs = (new RunsQuery($this->userId))->filtered($filters);
+        $runs = (new RunsQuery($this->userId, $this->timezone))->filtered($filters);
 
-        $rows = $runs->map(fn ($run) => array_merge(
-            $run->getAttributes(),
-            ['url' => route('runs.show', $run->id)],
-        ))->all();
+        $rows = $runs->map(fn ($run) => [
+            'id' => (int) $run->id,
+            'start_time' => $run->start_time->copy()->setTimezone($this->timezone)->toIso8601String(),
+            'distance_km' => (float) $run->distance_km,
+            'duration_seconds' => (int) $run->duration_seconds,
+            'steps' => $run->steps !== null ? (int) $run->steps : null,
+            'avg_heart_rate' => $run->avg_heart_rate !== null ? (int) $run->avg_heart_rate : null,
+            'avg_pace_seconds_per_km' => $run->avg_pace_seconds_per_km !== null ? (int) $run->avg_pace_seconds_per_km : null,
+            'url' => route('runs.show', $run->id),
+        ])->all();
 
         return json_encode($rows);
     }

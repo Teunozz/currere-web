@@ -9,7 +9,10 @@ use App\Models\Run;
 
 class HeartRateQuery
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array{max_observed_hr: int, runs: array<int, array{id: int, date: string, avg_heart_rate: int|null, duration_seconds: int, distance_km: float, sample_count: int, min_bpm: int|null, max_bpm: int|null}>}
@@ -30,7 +33,7 @@ class HeartRateQuery
 
         $runData = $runs->map(fn (Run $run) => [
             'id' => $run->id,
-            'date' => $run->start_time->toDateString(),
+            'date' => $run->start_time->copy()->setTimezone($this->timezone)->toDateString(),
             'avg_heart_rate' => $run->avg_heart_rate,
             'duration_seconds' => $run->duration_seconds,
             'distance_km' => (float) $run->distance_km,

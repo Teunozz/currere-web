@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Queries;
 
 use App\Models\Run;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 
 class RunsQuery
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @param  array{
@@ -30,11 +34,11 @@ class RunsQuery
         $query = Run::query()->where('user_id', $this->userId);
 
         if (isset($filters['from'])) {
-            $query->where('start_time', '>=', $filters['from']);
+            $query->where('start_time', '>=', CarbonImmutable::parse($filters['from'], $this->timezone)->utc());
         }
 
         if (isset($filters['to'])) {
-            $query->where('start_time', '<=', $filters['to'].' 23:59:59');
+            $query->where('start_time', '<=', CarbonImmutable::parse($filters['to'], $this->timezone)->endOfDay()->utc());
         }
 
         if (! isset($filters['from']) && ! isset($filters['to']) && isset($filters['days'])) {

@@ -176,6 +176,7 @@
                 },
                 body: JSON.stringify({
                     messages: messages.map((m) => ({ role: m.role, content: m.content })),
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 }),
                 signal: abortController.signal,
             });

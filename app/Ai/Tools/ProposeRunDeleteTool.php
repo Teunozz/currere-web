@@ -15,6 +15,7 @@ class ProposeRunDeleteTool implements Tool
 {
     public function __construct(
         private int $userId,
+        private string $timezone = 'UTC',
         private PendingActionStore $store = new PendingActionStore,
     ) {}
 
@@ -44,7 +45,7 @@ class ProposeRunDeleteTool implements Tool
 
         $summary = sprintf(
             'Delete run on %s — %s km, %d min',
-            $run->start_time->toDateString(),
+            $run->start_time->copy()->setTimezone($this->timezone)->toDateString(),
             number_format((float) $run->distance_km, 2),
             (int) round($run->duration_seconds / 60),
         );

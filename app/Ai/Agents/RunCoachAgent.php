@@ -33,6 +33,7 @@ class RunCoachAgent implements Agent, Conversational, HasTools
     public function __construct(
         private int $userId,
         private iterable $messages = [],
+        private string $timezone = 'UTC',
     ) {}
 
     public function instructions(): Stringable|string
@@ -54,6 +55,8 @@ Write tools (require user confirmation):
 
 Citation rule: whenever a tool result includes a `url` field for a specific run, link that run in your reply using markdown like `[YYYY-MM-DD — 8.2 km](url)`. Cite every specific run you reference. If a claim isn't backed by a tool result, say so plainly instead of guessing.
 
+Timezone rule: every date and timestamp returned by a tool is already in the user's local timezone (ISO 8601 strings include the local offset). Use the date portion as-is — do NOT shift it to UTC, and do NOT convert between zones.
+
 Confirmation rule: tools whose names start with `propose_` NEVER mutate data. After calling one, the UI automatically renders a confirm card with Confirm / Cancel buttons. Your text reply must be a single brief sentence describing the proposed action (e.g. "I'd like to delete Tuesday's 8.2 km run — confirm below?") and MUST NOT include any JSON, the pending_action envelope, or the UUID. Do not promise the change is complete; the user still has to click Confirm. If the user asks to undo a mutation you just proposed, instruct them to click Cancel on the card instead of calling another tool.
 
 Keep responses conversational and direct — short paragraphs, no headings unless the user asks for them. Offer concrete observations and one actionable suggestion when relevant.
@@ -63,14 +66,14 @@ PROMPT;
     public function tools(): iterable
     {
         return [
-            new FetchRunsTool($this->userId),
-            new FetchRunStatsTool($this->userId),
-            new FetchHeartRateDataTool($this->userId),
-            new FetchRunDetailTool($this->userId),
-            new ComparePeriodsTool($this->userId),
-            new FetchPersonalBestsTool($this->userId),
-            new ProposeRunEditTool($this->userId),
-            new ProposeRunDeleteTool($this->userId),
+            new FetchRunsTool($this->userId, $this->timezone),
+            new FetchRunStatsTool($this->userId, $this->timezone),
+            new FetchHeartRateDataTool($this->userId, $this->timezone),
+            new FetchRunDetailTool($this->userId, $this->timezone),
+            new ComparePeriodsTool($this->userId, $this->timezone),
+            new FetchPersonalBestsTool($this->userId, $this->timezone),
+            new ProposeRunEditTool($this->userId, $this->timezone),
+            new ProposeRunDeleteTool($this->userId, $this->timezone),
         ];
     }
 

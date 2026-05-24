@@ -8,7 +8,10 @@ use App\Models\Run;
 
 class RunDetailQuery
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array{
@@ -41,15 +44,15 @@ class RunDetailQuery
 
         return [
             'id' => $run->id,
-            'start_time' => $run->start_time->toIso8601String(),
-            'end_time' => $run->end_time->toIso8601String(),
+            'start_time' => $run->start_time->copy()->setTimezone($this->timezone)->toIso8601String(),
+            'end_time' => $run->end_time->copy()->setTimezone($this->timezone)->toIso8601String(),
             'distance_km' => (float) $run->distance_km,
             'duration_seconds' => (int) $run->duration_seconds,
             'steps' => $run->steps !== null ? (int) $run->steps : null,
             'avg_heart_rate' => $run->avg_heart_rate !== null ? (int) $run->avg_heart_rate : null,
             'avg_pace_seconds_per_km' => $run->avg_pace_seconds_per_km !== null ? (int) $run->avg_pace_seconds_per_km : null,
             'heart_rate_samples' => $run->heartRateSamples->map(fn ($sample) => [
-                'timestamp' => $sample->timestamp->toIso8601String(),
+                'timestamp' => $sample->timestamp->copy()->setTimezone($this->timezone)->toIso8601String(),
                 'bpm' => (int) $sample->bpm,
             ])->all(),
             'pace_splits' => $run->paceSplits->map(fn ($split) => [

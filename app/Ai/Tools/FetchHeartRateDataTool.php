@@ -12,7 +12,10 @@ use Stringable;
 
 class FetchHeartRateDataTool implements Tool
 {
-    public function __construct(private int $userId) {}
+    public function __construct(
+        private int $userId,
+        private string $timezone = 'UTC',
+    ) {}
 
     public function name(): string
     {
@@ -28,7 +31,7 @@ class FetchHeartRateDataTool implements Tool
     {
         $days = $request['days'] ?? 30;
 
-        return json_encode((new HeartRateQuery($this->userId))->forPeriod($days));
+        return json_encode((new HeartRateQuery($this->userId, $this->timezone))->forPeriod($days));
     }
 
     public function schema(JsonSchema $schema): array
